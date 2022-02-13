@@ -9,7 +9,7 @@ if __name__ == "__main__":
     df = pd.read_csv(config.TRAINING_FILE)
 
     # Create the kfold column
-    df["kfold"] = -1
+    df["fold"] = -1
     df = df.sample(frac=1).reset_index(drop=True)
 
     if config.VALIDATION_TYPE == "Kfold":
