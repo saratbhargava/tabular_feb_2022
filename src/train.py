@@ -14,6 +14,8 @@ import pandas as pd
 
 from sklearn import metrics
 
+import wandb
+
 
 def run(fold, model, num_trails):
     
@@ -40,6 +42,8 @@ def run(fold, model, num_trails):
         model_obj.fit(X_train, y_train)
         acc = model_obj.score(X_valid, y_valid)
         return {"loss": -acc, "status": STATUS_OK, "model": model_obj}
+
+    wandb.init(project="Tabular_Feb2022", entity="sarat")
     
     trials = Trials()
     best = fmin(
@@ -58,6 +62,14 @@ def run(fold, model, num_trails):
         best_model,
         Path(config.MODELS) / f"{model}_fold{fold}_{now_str}.bin"
     )
+
+    # visualize the model performance
+    y_pred = best_model.predict(X_valid)
+    y_pred_probas = best_model.predict_proba(X_valid)
+    wandb.sklearn.plot_classifier(best_model,
+                                  X_train, X_valid, y_train, y_valid,
+                                  y_pred, y_pred_probas, np.unique(y_train),
+                                  model_name=model, feature_names=None)
     
     return
    
