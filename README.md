@@ -6,14 +6,24 @@ The template for the code base is based on AAMLP book by Abhishek Thakur.
 
 # Models explored
 
-- SVM, SKlearn
-- Random Forest, SKlearn
-- GBDT, XGBOOST
-- MLP, RTDL
-- ResNet, RTDL
-- Transformer, RTDL
+For each model, I have listed best pre-processing based on public leaderboard score.
+
+|Model|Pre-processing|Public leaderboard|
+|-----|--------------|------------------|
+|Decision Tree| | |
+|SVM| | |
+|Random forest| | |
+|XGBoost| | |
+|MLP| | |
+|ResNet| | |
+|Transformer| | |
 
 # Feature engineering
 
+TODO: Feature engineering ideas explored
 
 # Conclusions
+
+What worked and what didn't and why?
+
+What insights and learnings did you learn from this project?
