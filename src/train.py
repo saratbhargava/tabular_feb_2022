@@ -68,11 +68,14 @@ def run(fold, model, num_trails):
     return
    
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Train ML model")
 
-    parser.add_argument("--fold", type=int)
-    parser.add_argument("--model", type=str)
-    parser.add_argument("--num_trails", type=int, default=3)
+    parser.add_argument("--fold", type=int, help='Fold to use for validation')
+    parser.add_argument("--model", type=str, help='ML model',
+                        choices=model_dispatcher.models.keys())
+    parser.add_argument(
+        "--num_trails", type=int,
+        help='Number of trials for hyperparam tuning', default=3)
 
     args = parser.parse_args()
 
