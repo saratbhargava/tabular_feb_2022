@@ -12,13 +12,7 @@ from hyperopt import fmin, tpe, Trials, STATUS_OK
 import numpy as np
 import pandas as pd
 
-
-if config.DEVICE == "cpu":    
-    from sklearn import metrics
-elif config.DEVICE == "cuda":
-    from cuml import metrics
-else:
-    raise ValueError(f"Invalid value for config.device: {config.device}")
+from sklearn import metrics
 
 
 def run(fold, model, num_trails):

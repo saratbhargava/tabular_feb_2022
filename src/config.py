@@ -1,7 +1,7 @@
 from hyperopt import hp
 from hyperopt.pyll.base import scope
 
-DEVICE = "cpu" # "cuda"
+DEVICE = "cpu" # "cpu", "cuda"
 
 TRAINING_FILE = "../input/train.csv"
 
