@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from sklearn import metrics
+from sklearn.preprocessing import LabelEncoder
 
 import wandb
 
@@ -35,6 +36,13 @@ def run(fold, model, num_trails):
     y_valid = df_valid[config.TARGET_LABEL]
     X_valid = df_valid.drop(config.TARGET_LABEL, axis=1)
 
+    # Apply labelencoder
+    le = LabelEncoder()
+    le.fit(y_train)
+    y_train = le.transform(y_train)
+    y_valid = le.transform(y_valid)
+    
+    
     # hyper params optimization
     def objective(hyper_param_dict):
         model_class = model_dispatcher.models[model]
