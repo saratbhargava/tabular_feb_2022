@@ -94,5 +94,6 @@ if __name__ == "__main__":
 
     print(args.fold, args.model, args.num_trails, args.model_filename)
     
-    run(fold=args.fold, model=args.model, num_trails=args.num_trails)
+    run(fold=args.fold, model=args.model, num_trails=args.num_trails,
+        model_filename=args.model_filename)
     
