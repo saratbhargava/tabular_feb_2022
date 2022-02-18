@@ -3,16 +3,16 @@
 #########  PARAMTERS ######################
 
 # select fold index
-FOLD=2
+FOLD=1
 
 # select ml model type
-MODEL=xgb
+MODEL=rf
 
 # number of trails
-NUM_TRAILS=1
+NUM_TRAILS=10
 
 # Submit message
-SUBMIT_MESSAGE="XGB first submission using complete pipeline"
+SUBMIT_MESSAGE="${MODEL} eval fold ${FOLD} trails ${NUM_TRAILS} using complete pipeline"
 
 #########  TRAIN AND SUBMIT MODEL ###########
 
@@ -42,7 +42,7 @@ echo Inference ${MODEL} model complete at `date`
 echo Inference duration: ${train_duration} seconds
 
 # Submit the output csv to kaggle
-kaggle competitions submit -c tabular-playground-series-feb-2022 -f ../submit/${SUBMIT_FILENAME} -m ${SUBMIT_MESSAGE}
+kaggle competitions submit -c tabular-playground-series-feb-2022 -f ../submit/${SUBMIT_FILENAME} -m "${SUBMIT_MESSAGE}"
 
 echo Kaggle submission complete
 
