@@ -47,5 +47,6 @@ hyper_params = {
         "reg_lambda": hp.choice("reg_lambda", [0.01, 0.1, 1, 10]),
         "min_split_loss": hp.choice("min_split_loss", [0, 0.1, 0.2, 0.5]),
         "n_jobs": -1,
+        "use_label_encoder": False,
     }
 }
