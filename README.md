@@ -12,8 +12,8 @@ For each model, I have listed best pre-processing based on public leaderboard sc
 |-----|--------------|------------------|
 |Decision Tree| | |
 |SVM| | |
-|Random forest| None | 0.96787|
-|XGBoost| | |
+|Random forest| None | 0.96787 |
+|XGBoost| None | 0.86727 |
 |MLP| | |
 |ResNet| | |
 |Transformer| | |
