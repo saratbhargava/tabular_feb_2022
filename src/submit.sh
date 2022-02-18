@@ -1,5 +1,8 @@
 #/bin/bash
 
+# exit immediately if command returns non-zero status
+set -e
+
 #########  PARAMTERS ######################
 
 # select fold index
@@ -9,7 +12,7 @@ FOLD=1
 MODEL=rf
 
 # number of trails
-NUM_TRAILS=10
+NUM_TRAILS=2
 
 # Submit message
 SUBMIT_MESSAGE="${MODEL} eval fold ${FOLD} trails ${NUM_TRAILS} using complete pipeline"
