@@ -18,7 +18,7 @@ from sklearn.preprocessing import LabelEncoder
 import wandb
 
 
-def run(fold, model, num_trails):
+def run(fold, model, num_trails, model_filename):
     
     # read the data
     df = pd.read_csv( 
@@ -46,7 +46,7 @@ def run(fold, model, num_trails):
     # hyper params optimization
     def objective(hyper_param_dict):
         model_class = model_dispatcher.models[model]
-        model_obj = model_class(**hyper_param_dict, n_jobs=-1)
+        model_obj = model_class(**hyper_param_dict)
         model_obj.fit(X_train, y_train)
         acc = model_obj.score(X_valid, y_valid)
         return {"loss": -acc, "status": STATUS_OK, "model": model_obj}
@@ -64,11 +64,9 @@ def run(fold, model, num_trails):
 
     # save the best model
     best_model = trials.results[np.argmin([result['loss'] for result in trials.results])]['model']
-    now = datetime.now()
-    now_str = now.strftime("%d_%m_%Y_%H_%M_%S")
     joblib.dump(
         best_model,
-        Path(config.MODELS) / f"{model}_fold{fold}_{now_str}.bin"
+        Path(config.MODELS) / model_filename
     )
 
     # visualize the model performance
@@ -90,10 +88,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num_trails", type=int,
         help='Number of trials for hyperparam tuning', default=3)
+    parser.add_argument("--model_filename", type=str, help='Model filename')
 
     args = parser.parse_args()
 
-    print(args.fold, args.model, args.num_trails)
+    print(args.fold, args.model, args.num_trails, args.model_filename)
     
     run(fold=args.fold, model=args.model, num_trails=args.num_trails)
     
