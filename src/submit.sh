@@ -12,12 +12,12 @@ MODEL=xgb
 NUM_TRAILS=1
 
 # Submit message
-SUBMIT_MESSAGE = "XGB first submission using complete pipeline"
+SUBMIT_MESSAGE="XGB first submission using complete pipeline"
 
 #########  TRAIN AND SUBMIT MODEL ###########
 
 # Best Model
-MODEL_FILENAME=${MODEL}_fold${FOLD}_${date+%m_%d_%Y_%H_%M_%S}.bin
+MODEL_FILENAME=${MODEL}_fold${FOLD}_`date +%m_%d_%Y_%H_%M_%S`.bin
 
 SUBMIT_FILENAME=${MODEL_FILENAME:0:-4}.csv
 
