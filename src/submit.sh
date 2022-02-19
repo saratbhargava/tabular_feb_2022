@@ -6,7 +6,7 @@ set -e
 #########  PARAMTERS ######################
 
 # select fold index
-FOLD=1
+FOLD=-1
 
 # select ml model type
 MODEL=rf
@@ -28,7 +28,7 @@ echo Training ${MODEL} model started at `date`
 SECONDS=0
 
 # train the model
-python train.py --fold ${FOLD} --model ${MODEL} --num_trails ${NUM_TRAILS} --model_filename ${MODEL_FILENAME}
+python train.py --fold ${FOLD} --model ${MODEL} --tune --num_trails ${NUM_TRAILS} --model_filename ${MODEL_FILENAME}
 
 train_duration=$SECONDS
 echo Training ${MODEL} model complete at `date`

@@ -26,12 +26,14 @@ def run(fold, model, tune, num_trails, model_filename):
         f"{config.TRAINING_FILE[:-4]}_folds.csv")
 
     y = df[config.TARGET_LABEL]
-    X = df.drop(["row_id", "fold"], axis=1)
+    X = df.drop(["row_id", "fold", config.TARGET_LABEL], axis=1)
 
     # Apply labelencoder
     le = LabelEncoder()
     le.fit(y)
     y = le.transform(y)
+
+    print(X, y)
     
     df_train = df[df['fold'] != fold]
     df_valid = df[df['fold'] == fold]
@@ -71,7 +73,7 @@ def run(fold, model, tune, num_trails, model_filename):
                                              random_state=config.RANDOM_STATE)
         cv_scores = model_selection.cross_val_score(
             estimator=model_obj, X=X, y=y,
-            scoring='accuracy' cv=cv, n_jobs=-1)
+            cv=cv, n_jobs=-1)
         model_obj.fit(X, y)
         return {"loss": -np.mean(cv_scores), "status": STATUS_OK,
                 "model": model_obj, "hyper_param_dict": hyper_param_dict}
@@ -95,14 +97,16 @@ def run(fold, model, tune, num_trails, model_filename):
             run = wandb.init(project="Tabular_Feb2022", entity="sarat", reinit=True)
             current_model = result['model']
             wandb.config.update(result['hyper_param_dict'])
-            wandb.log({'valid/accuracy': result['loss']})
-            # visualize the model performance
-            y_pred = current_model.predict(X_valid)
-            y_pred_probas = current_model.predict_proba(X_valid)
-            wandb.sklearn.plot_classifier(current_model,
-                                          X_train, X_valid, y_train, y_valid,
-                                          y_pred, y_pred_probas, np.unique(y_train),
-                                          model_name=model, feature_names=feature_names)
+            wandb.log({'valid/accuracy': -result['loss']})
+            if fold >= 0:
+                # visualize the model performance
+                y_pred = current_model.predict(X_valid)
+                y_pred_probas = current_model.predict_proba(X_valid)
+                wandb.sklearn.plot_classifier(
+                    current_model,
+                    X_train, X_valid, y_train, y_valid,
+                    y_pred, y_pred_probas, np.unique(y_train),
+                    model_name=model, feature_names=feature_names)
             run.finish()
 
         # save the best model
