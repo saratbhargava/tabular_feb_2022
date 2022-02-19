@@ -10,13 +10,15 @@ TRAINING_FILE = "../input/train.csv"
 
 TESTING_FILE = "../input/test.csv"
 
-os.environ['WANDB_MODE'] = 'offline'
+os.environ['WANDB_MODE'] = 'online'
 
 MODELS = "../models/"
 
 SUBMIT = "../submit/"
 
 N_SPLITS = 5
+
+RANDOM_STATE= 42
 
 VALIDATION_TYPE = "StratifiedKfold" # "StratifiedKfold", "Kfold"
 
@@ -46,6 +48,32 @@ hyper_params = {
         "max_depth": hp.choice("max_depth", [6, 10, 15]),
         "reg_lambda": hp.choice("reg_lambda", [0.01, 0.1, 1, 10]),
         "min_split_loss": hp.choice("min_split_loss", [0, 0.1, 0.2, 0.5]),
+        "n_jobs": -1,
+        "use_label_encoder": False,
+    }
+}
+
+fixed_hyper_params = {
+    "decision_tree": {
+        "criterion": "entropy", # "entropy", "gini"
+        "min_samples_split": 2, # 2-10
+    },
+    "rf": {
+        "n_estimators": 100,
+        "criterion": "entropy", # "entropy", "gini"
+        "n_jobs": -1,
+        "min_samples_split": 2, # 2-10
+    },
+    "svm": {
+        "penalty": "l2",
+        "C": 2,
+    },
+    "xgb":{
+        "learning_rate": 0.1,
+        "n_estimators": 50,
+        "max_depth": 6,
+        "reg_lambda": 0.1,
+        "min_split_loss": 0.1,
         "n_jobs": -1,
         "use_label_encoder": False,
     }
