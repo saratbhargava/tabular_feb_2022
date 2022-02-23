@@ -78,3 +78,8 @@ fixed_hyper_params = {
         "use_label_encoder": False,
     }
 }
+
+# dashboard section
+INDEX_NAME = "sample_idx"
+TARGET_NAME = "Bacteria"
+DASHBOARD_PORT = 8052
