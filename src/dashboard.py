@@ -9,30 +9,23 @@ from sklearn import preprocessing
 from explainerdashboard import ClassifierExplainer, ExplainerDashboard
 
 
-def run(fold, model_filename):
+def run(fold, num_valid, model_filename):
 
     # read the data
-    df = pd.read_csv( 
+    df = pd.read_csv(
         f"{config.TRAINING_FILE[:-4]}_folds.csv")
 
     # set the index
     df = df.set_index("row_id")
     df.index.name = config.INDEX_NAME
 
-    df_train = df[df['fold'] != fold]
     df_valid = df[df['fold'] == fold]
-
-    df_train = df_train.drop(["fold"], axis=1)
     df_valid = df_valid.drop(["fold"], axis=1)
 
-    # Create train features and target labels
-    y_train = df_train[config.TARGET_LABEL]
-    X_train = df_train.drop(config.TARGET_LABEL, axis=1)
+    df_valid_sample = df_valid.sample(num_valid, random_state=config.RANDOM_STATE)
 
-    y_valid = df_valid[config.TARGET_LABEL]
-    X_valid = df_valid.drop(config.TARGET_LABEL, axis=1)
-
-    y_train.name = config.TARGET_NAME
+    y_valid = df_valid_sample[config.TARGET_LABEL]
+    X_valid = df_valid_sample.drop(config.TARGET_LABEL, axis=1)
     y_valid.name = config.TARGET_NAME
 
     # Load the model
@@ -41,9 +34,8 @@ def run(fold, model_filename):
 
     # Apply labelencoder
     le = preprocessing.LabelEncoder()
-    le.fit(y_train)
+    le.fit(df_valid[config.TARGET_LABEL])
 
-    y_train = le.transform(y_train)
     y_valid = le.transform(y_valid)
 
     # create an explainer board
@@ -63,6 +55,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Explain ML model")
 
     parser.add_argument("--fold", type=int, help='Fold to use for validation')
+    parser.add_argument("--num_valid", type=int, help='Number of validation examples')
     parser.add_argument("--model_filename", type=str, help='Model filename')
 
     args = parser.parse_args()
