@@ -24,35 +24,41 @@ def run(fold, model, tune, num_trails, model_filename):
     # read the data
     df = pd.read_csv( 
         f"{config.TRAINING_FILE[:-4]}_folds.csv")
+    df = df.set_index("row_id")
+    df.index.name = config.INDEX_NAME
 
-    y = df[config.TARGET_LABEL]
-    X = df.drop(["row_id", "fold", config.TARGET_LABEL], axis=1)
+    if fold == -1:
+        y = df[config.TARGET_LABEL]
+        X = df.drop(["fold", config.TARGET_LABEL], axis=1)
 
-    # Apply labelencoder
-    le = LabelEncoder()
-    le.fit(y)
-    y = le.transform(y)
+        # Apply labelencoder
+        le = LabelEncoder()
+        le.fit(y)
+        y = le.transform(y)
 
-    print(X, y)
-    
-    df_train = df[df['fold'] != fold]
-    df_valid = df[df['fold'] == fold]
+        feature_names = list(X.columns)
 
-    df_train = df_train.drop(["fold", "row_id"], axis=1)
-    df_valid = df_valid.drop(["fold", "row_id"], axis=1)
+    else:
+        df_train = df[df['fold'] != fold]
+        df_valid = df[df['fold'] == fold]
 
-    # Create train features and target labels
-    y_train = df_train[config.TARGET_LABEL]
-    X_train = df_train.drop(config.TARGET_LABEL, axis=1)
+        df_train = df_train.drop(["fold",], axis=1)
+        df_valid = df_valid.drop(["fold",], axis=1)
 
-    y_valid = df_valid[config.TARGET_LABEL]
-    X_valid = df_valid.drop(config.TARGET_LABEL, axis=1)
+        # Create train features and target labels
+        y_train = df_train[config.TARGET_LABEL]
+        X_train = df_train.drop(config.TARGET_LABEL, axis=1)
 
-    feature_names = list(X_train.columns)
+        y_valid = df_valid[config.TARGET_LABEL]
+        X_valid = df_valid.drop(config.TARGET_LABEL, axis=1)
 
-    # Apply labelencoder
-    y_train = le.transform(y_train)
-    y_valid = le.transform(y_valid)
+        feature_names = list(X_train.columns)
+
+        # Apply labelencoder
+        le = LabelEncoder()
+        le.fit(y_train)        
+        y_train = le.transform(y_train)
+        y_valid = le.transform(y_valid)
 
 
     # hyper params optimization
@@ -78,7 +84,7 @@ def run(fold, model, tune, num_trails, model_filename):
         return {"loss": -np.mean(cv_scores), "status": STATUS_OK,
                 "model": model_obj, "hyper_param_dict": hyper_param_dict}
 
-    if fold < 0:
+    if fold == -1:
         objective_fn = k_fold_objective
     else:
         objective_fn = objective
@@ -112,8 +118,11 @@ def run(fold, model, tune, num_trails, model_filename):
         # save the best model
         best_model = trials.results[np.argmin([result['loss'] for result in trials.results])]['model']
     else:
-        best_model = objective_fn(config.fixed_hyper_params)['model']
-    
+        obj_dict = objective_fn(config.fixed_hyper_params[model])
+        best_model = obj_dict['model']
+        valid_acc = -obj_dict['loss']
+        print(f"{valid_acc=}")
+
     joblib.dump(
         best_model,
         Path(config.MODELS) / model_filename
