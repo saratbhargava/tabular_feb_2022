@@ -28,6 +28,8 @@ def run(fold, num_valid, model_filename):
     X_valid = df_valid_sample.drop(config.TARGET_LABEL, axis=1)
     y_valid.name = config.TARGET_NAME
 
+    print(X_valid.shape, y_valid.shape)
+
     # Load the model
     model_filepath = Path(config.MODELS) / model_filename
     model_obj = joblib.load(model_filepath)
@@ -60,4 +62,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    run(fold=args.fold, model_filename=args.model_filename)
+    run(fold=args.fold, num_valid=args.num_valid, model_filename=args.model_filename)

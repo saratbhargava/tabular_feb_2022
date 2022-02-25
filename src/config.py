@@ -62,7 +62,7 @@ fixed_hyper_params = {
         "n_estimators": 100,
         "criterion": "entropy", # "entropy", "gini"
         "n_jobs": -1,
-        "min_samples_split": 2, # 2-10
+        "min_samples_split": 3, # 2-10
     },
     "svm": {
         "penalty": "l2",
