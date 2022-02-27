@@ -6,6 +6,8 @@ from pathlib import Path
 import config
 import model_dispatcher
 
+import rich
+
 import hyperopt
 from hyperopt import fmin, tpe, Trials, STATUS_OK
 
@@ -67,7 +69,9 @@ def run(fold, model, tune, num_trails, model_filename):
         model_obj = model_class(**hyper_param_dict)
         model_obj.fit(X_train, y_train)
         acc = model_obj.score(X_valid, y_valid)
+        train_acc = model_obj.score(X_train, y_train)
         return {"loss": -acc, "status": STATUS_OK,
+                "train_acc": train_acc,
                 "model": model_obj,
                 "hyper_param_dict": hyper_param_dict}
 
@@ -81,8 +85,29 @@ def run(fold, model, tune, num_trails, model_filename):
             estimator=model_obj, X=X, y=y,
             cv=cv, n_jobs=-1)
         model_obj.fit(X, y)
-        return {"loss": -np.mean(cv_scores), "status": STATUS_OK,
+        train_acc = model_obj.score(X_train, y_train)
+        return {"loss": -np.mean(cv_scores), "train_acc": train_acc, "status": STATUS_OK,
                 "model": model_obj, "hyper_param_dict": hyper_param_dict}
+
+
+    def track_model_with_wandb(trained_model, hyper_param_dict, train_acc,
+                               valid_acc, wandb_plot_classifier,
+                               model_filename=""):
+        run = wandb.init(project=config.PROJECT, entity=config.ENTITY, reinit=True)
+        wandb.config.update(hyper_param_dict)
+        wandb.log({'valid/accuracy': valid_acc, 'train/accuracy': train_acc,
+                   "model_filename": model_filename})
+        if wandb_plot_classifier:
+            # visualize the model performance
+            y_pred = trained_model.predict(X_valid)
+            y_pred_probas = trained_model.predict_proba(X_valid)
+            wandb.sklearn.plot_classifier(
+                trained_model,
+                X_train, X_valid, y_train, y_valid,
+                y_pred, y_pred_probas, np.unique(y_train),
+                model_name=model, feature_names=feature_names)
+        run.finish()
+
 
     if fold == -1:
         objective_fn = k_fold_objective
@@ -93,35 +118,32 @@ def run(fold, model, tune, num_trails, model_filename):
         trials = Trials()
         best = fmin(
             fn = objective_fn,
-            space = config.hyper_params[model], 
+            space = config.hyper_params[model],
             algo = tpe.suggest,
             max_evals = num_trails,
             trials = trials,
         )
 
-        for result in trials.results:
-            run = wandb.init(project="Tabular_Feb2022", entity="sarat", reinit=True)
-            current_model = result['model']
-            wandb.config.update(result['hyper_param_dict'])
-            wandb.log({'valid/accuracy': -result['loss']})
-            if fold >= 0:
-                # visualize the model performance
-                y_pred = current_model.predict(X_valid)
-                y_pred_probas = current_model.predict_proba(X_valid)
-                wandb.sklearn.plot_classifier(
-                    current_model,
-                    X_train, X_valid, y_train, y_valid,
-                    y_pred, y_pred_probas, np.unique(y_train),
-                    model_name=model, feature_names=feature_names)
-            run.finish()
+        min_trail_idx = np.argmin([result['loss'] for result in trials.results])
+        for idx, result in enumerate(trials.results):
+            track_model_with_wandb(result['model'], result['hyper_param_dict'],
+                                   train_acc=result['train_acc'],
+                                   valid_acc=-result['loss'],
+                                   wandb_plot_classifier=(fold>=0),
+                                   model_filename=model_filename if idx==min_trail_idx else "")
 
         # save the best model
-        best_model = trials.results[np.argmin([result['loss'] for result in trials.results])]['model']
+        best_model = trials.results[min_trail_idx]['model']
     else:
         obj_dict = objective_fn(config.fixed_hyper_params[model])
         best_model = obj_dict['model']
-        valid_acc = -obj_dict['loss']
-        print(f"{valid_acc=}")
+        track_model_with_wandb(best_model, obj_dict['hyper_param_dict'],
+                               train_acc=obj_dict['train_acc'],
+                               valid_acc=-obj_dict['loss'],
+                               wandb_plot_classifier=True,
+                               model_filename=model_filename)
+        rich.print(obj_dict['hyper_param_dict'])
+        rich.print(f"train_acc: {obj_dict['train_acc']}, valid_acc: {-obj_dict['loss']}")
 
     joblib.dump(
         best_model,
@@ -144,8 +166,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    print(args.fold, args.model, args.num_trails, args.model_filename)
-    
     run(fold=args.fold, model=args.model, tune=args.tune, num_trails=args.num_trails,
         model_filename=args.model_filename)
-    
