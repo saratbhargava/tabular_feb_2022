@@ -6,16 +6,16 @@ set -e
 #########  PARAMTERS ######################
 
 # select fold index
-FOLD=3
+FOLD=2
 
 # select ml model type
-MODEL=rf
+MODEL=xgb
 
 # tune the model
-IS_TUNE=false # true
+IS_TUNE=true # true
 
 # number of trails
-NUM_TRAILS=2
+NUM_TRAILS=1
 
 # Kaggle Submission
 IS_SUBMIT=false # true
@@ -38,9 +38,10 @@ else
     python train.py --fold ${FOLD} --model ${MODEL} --model_filename ${MODEL_FILENAME}
 fi
 
-train_duration=$SECONDS
+train_duration=${SECONDS}
 echo Training ${MODEL} model complete at `date`
 echo Training duration: ${train_duration} seconds
+echo ""
 
 # test the model
 echo Inference ${MODEL} model started at `date`
@@ -48,9 +49,10 @@ SECONDS=0
 
 python inference.py --model_filename ${MODEL_FILENAME} --submit_filename ${SUBMIT_FILENAME}
 
-inference_duration=$SECONDS
+inference_duration=${SECONDS}
 echo Inference ${MODEL} model complete at `date`
-echo Inference duration: ${train_duration} seconds
+echo Inference duration: ${inference_duration} seconds
+echo ""
 
 # Submit the output csv to kaggle
 if ${IS_SUBMIT} ; then
