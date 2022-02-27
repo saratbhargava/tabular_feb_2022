@@ -51,7 +51,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    print(args.model_filename, args.submit_filename)
-    
     run(model_filename=args.model_filename,
         submit_filename=args.submit_filename)
