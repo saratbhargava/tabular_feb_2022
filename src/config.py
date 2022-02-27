@@ -10,8 +10,6 @@ TRAINING_FILE = "../input/train.csv"
 
 TESTING_FILE = "../input/test.csv"
 
-os.environ['WANDB_MODE'] = 'online'
-
 MODELS = "../models/"
 
 SUBMIT = "../submit/"
@@ -43,12 +41,15 @@ hyper_params = {
         "C": hp.loguniform("C", -2, 8),
     },
     "xgb":{
-        "learning_rate": hp.choice("learning_rate", [0.01, 0.1, 0.3]),
-        "n_estimators": hp.choice("n_estimators", [50, 100]),
-        "max_depth": hp.choice("max_depth", [6, 10, 15]),
-        "reg_lambda": hp.choice("reg_lambda", [0.01, 0.1, 1, 10]),
-        "min_split_loss": hp.choice("min_split_loss", [0, 0.1, 0.2, 0.5]),
+        "learning_rate": hp.choice("learning_rate", [0.5]),
+        "n_estimators": hp.choice("n_estimators", [150]),
+        "max_depth": hp.choice("max_depth", [10, 15, 20]),
+        "reg_lambda": hp.choice("reg_lambda", [7.5, 10, 12.5, 15]),
+        "reg_alpha": 0.5,
+        "min_split_loss": hp.choice("min_split_loss", [0.1, 0.2]),
         "n_jobs": -1,
+        "tree_method": "gpu_hist",
+        "eval_metric": "mlogloss",
         "use_label_encoder": False,
     }
 }
@@ -69,15 +70,24 @@ fixed_hyper_params = {
         "C": 2,
     },
     "xgb":{
-        "learning_rate": 0.1,
-        "n_estimators": 50,
-        "max_depth": 6,
-        "reg_lambda": 0.1,
+        "learning_rate": 0.5,
+        "n_estimators": 100,
+        "max_depth": 15,
+        "reg_lambda": 10.0,
+        "reg_alpha": 0.5,
         "min_split_loss": 0.1,
         "n_jobs": -1,
         "use_label_encoder": False,
+        "eval_metric": "mlogloss",
+        "tree_method": "gpu_hist",
     }
 }
+
+# wandb settings
+os.environ['WANDB_MODE'] = 'online'
+os.environ['WANDB_SILENT'] = 'true'
+PROJECT="Tabular_Feb2022"
+ENTITY="sarat"
 
 # dashboard section
 INDEX_NAME = "sample_idx"
